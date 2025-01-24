@@ -31,7 +31,7 @@ jobs:
                 trigger_workflow: true
                 wait_workflow: true
               id: trigger
-            
+
             - name: Download Tests
               uses: actions/download-artifact@v4
               with:
@@ -40,14 +40,14 @@ jobs:
                 github-token: ${{ secrets.TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
-            
+
             - name: Publish Test Results
               uses: EnricoMi/publish-unit-test-result-action@v2
               if: always()
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
-            
+
             - name: Upload Test Results to Artifacts
               if: always()
               uses: actions/upload-artifact@v3
