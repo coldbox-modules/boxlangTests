@@ -18,7 +18,7 @@ jobs:
               with:
                 owner: ${{ github.repository_owner}}
                 repo: ${{ matrix.repositories }}
-                github_token: ${{ secrets.GITHUB_TOKEN }}
+                github_token: ${{ secrets.TOKEN }}
                 workflow_file_name: snapshot.yml
                 ref: development
                 wait_interval: 120
