@@ -7,6 +7,9 @@ permissions:
   actions: write
   contents: read
 
+env:
+  GITHUB_ORGANIZATION: coldbox-modules
+
 jobs:
     trigger:
         runs-on: ubuntu-latest
@@ -19,7 +22,7 @@ jobs:
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
               with:
-                owner: coldbox-modules
+                owner: ${{ env.GITHUB_ORGANIZATION }}
                 repo: ${{ matrix.repositories }}
                 github_token: ${{ secrets.TOKEN }}
                 workflow_file_name: snapshot.yml
@@ -36,7 +39,7 @@ jobs:
                 pattern: test-results-boxlang*
                 path: ${{ matrix.repositories }}-tests
                 github-token: ${{ secrets.TOKEN }}
-                repository: ${{ github.repository_owner }}/${{ matrix.repositories }}
+                repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ needs.trigger.outputs.workflow-id }}
             
             - name: Unzip test results
