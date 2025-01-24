@@ -16,6 +16,7 @@ jobs:
         strategy:
             matrix:
                 repositories: ["cbSwagger", "cbdebugger"]
+            fail-fast: false
         steps:
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
