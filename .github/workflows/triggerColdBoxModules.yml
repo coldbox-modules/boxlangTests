@@ -11,16 +11,17 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                repositories: ["cbSwagger", "just-a-test-repo"]
+                repositories: ["cbdebugger"]
         steps:
             - name: Trigger ColdBox Module
-              uses: convictional/trigger-workflow-and-wait@v1.6.1
+              uses: convictional/trigger-workflow-and-wait@v1.6.5
               with:
-                owner: ${{ github.repository_owner}}
+                owner: coldbox-modules
                 repo: ${{ matrix.repositories }}
                 github_token: ${{ secrets.TOKEN }}
                 workflow_file_name: snapshot.yml
                 ref: development
                 wait_interval: 120
+                propagate_failure: false
                 trigger_workflow: true
                 wait_workflow: true
