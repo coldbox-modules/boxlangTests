@@ -18,6 +18,9 @@ jobs:
                 repositories: ["cbSwagger", "cbdebugger"]
             fail-fast: false
         steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
               with:
@@ -45,8 +48,14 @@ jobs:
               uses: EnricoMi/publish-unit-test-result-action@v2
               if: always()
               with:
-                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
+                junit_files: ${{ matrix.repositories }}-tests/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
+
+            - name: What is in download folder
+              run: |
+                pwd
+                ls -la ${{ matrix.repositories }}-tests
+                tree ${{ matrix.repositories }}-tests
 
             - name: Upload Test Results to Artifacts
               if: always()
@@ -54,4 +63,4 @@ jobs:
               with:
                 name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
                 path: |
-                  ${{ matrix.repositories }}-tests/**/*
+                  ${{ matrix.repositories }}-tests/*
