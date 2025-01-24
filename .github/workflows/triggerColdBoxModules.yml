@@ -34,7 +34,7 @@ jobs:
             - name: Lookup for tests results
               uses: actions/download-artifact@v4
               with:
-                pattern: test-results-boxlang*
+                pattern: "**/boxlang**"
                 path: ${{ matrix.repositories }}-tests
                 github-token: ${{ secrets.TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
