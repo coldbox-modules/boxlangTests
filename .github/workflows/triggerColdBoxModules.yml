@@ -35,7 +35,7 @@ jobs:
             - name: Download Tests
               uses: actions/download-artifact@v4
               with:
-                pattern: "**/boxlang**"
+                pattern: '*boxlang*'
                 path: ${{ matrix.repositories }}-tests
                 github-token: ${{ secrets.TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
