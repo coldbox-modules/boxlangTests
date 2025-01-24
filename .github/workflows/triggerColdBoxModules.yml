@@ -13,6 +13,8 @@ jobs:
         strategy:
             matrix:
                 repositories: ["cbSwagger", "just-a-test-repo"]
+        outputs:
+          workflow-id: ${{ steps.trigger.outputs.workflow_id }}
         steps:
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
@@ -26,3 +28,17 @@ jobs:
                 propagate_failure: false
                 trigger_workflow: true
                 wait_workflow: true
+              id: trigger
+            
+            - name: Lookup for tests results
+              uses: actions/download-artifact@v4
+              with:
+                pattern: test-results-boxlang*
+                path: ${{ matrix.repositories }}-tests
+                github-token: ${{ secrets.TOKEN }}
+                repository: ${{ github.repository_owner }}/${{ matrix.repositories }}
+                run-id: ${{ needs.trigger.outputs.workflow-id }}
+            
+            - name: Unzip test results
+              run: |
+                  ls -la
