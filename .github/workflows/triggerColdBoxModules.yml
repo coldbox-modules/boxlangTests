@@ -44,18 +44,18 @@ jobs:
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
 
+            - name: What is in download folder
+              run: |
+                pwd
+                ls -la
+                tree .
+
             - name: Publish Test Results
               uses: EnricoMi/publish-unit-test-result-action@v2
               if: always()
               with:
                 junit_files: ${{ matrix.repositories }}-tests/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
-
-            - name: What is in download folder
-              run: |
-                pwd
-                ls -la ${{ matrix.repositories }}-tests
-                tree ${{ matrix.repositories }}-tests
 
             - name: Upload Test Results to Artifacts
               if: always()
