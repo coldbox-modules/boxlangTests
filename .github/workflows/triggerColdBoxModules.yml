@@ -1,6 +1,7 @@
 name: Trigger ColdBox Modules Tests
 on:
     workflow_dispatch:
+    push:
 
 permissions:
   actions: write
