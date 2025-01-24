@@ -32,7 +32,7 @@ jobs:
                 wait_workflow: true
               id: trigger
             
-            - name: Lookup for tests results
+            - name: Download Tests
               uses: actions/download-artifact@v4
               with:
                 pattern: "**/boxlang**"
@@ -41,6 +41,17 @@ jobs:
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
             
-            - name: Unzip test results
-              run: |
-                  ls -la
+            - name: Publish Test Results
+              uses: EnricoMi/publish-unit-test-result-action@v2
+              if: always()
+              with:
+                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
+                check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
+            
+            - name: Upload Test Results to Artifacts
+              if: always()
+              uses: actions/upload-artifact@v3
+              with:
+                name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
+                path: |
+                  ${{ matrix.repositories }}-tests/**/*
