@@ -16,8 +16,6 @@ jobs:
         strategy:
             matrix:
                 repositories: ["cbSwagger", "cbdebugger"]
-        outputs:
-          workflow-id: ${{ steps.trigger.outputs.workflow_id }}
         steps:
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
@@ -40,7 +38,7 @@ jobs:
                 path: ${{ matrix.repositories }}-tests
                 github-token: ${{ secrets.TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
-                run-id: ${{ needs.trigger.outputs.workflow-id }}
+                run-id: ${{ steps.trigger.outputs.workflow_id }}
             
             - name: Unzip test results
               run: |
