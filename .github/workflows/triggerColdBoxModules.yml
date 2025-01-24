@@ -14,7 +14,7 @@ jobs:
                 repositories: ["cbSwagger", "just-a-test-repo"]
         steps:
             - name: Trigger ColdBox Module
-              uses: convictional/trigger-workflow-and-wait@v1.6.5
+              uses: convictional/trigger-workflow-and-wait@v1.6.1
               with:
                 owner: ${{ github.repository_owner}}
                 repo: ${{ matrix.repositories }}
@@ -22,3 +22,5 @@ jobs:
                 workflow_file_name: snapshot.yml
                 ref: development
                 wait_interval: 120
+                trigger_workflow: true
+                wait_workflow: true
