@@ -46,8 +46,7 @@ jobs:
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
 
-            - name: Retrieve testbox logs if no tests artifacts are found
-              if: ${{ ! steps.download-tests.outputs.download-path }}
+            - name: Retrieve job logs
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.TOKEN }} | gh auth login --with-token
@@ -61,14 +60,14 @@ jobs:
                 tree .
 
             - name: Publish Test Results if present
-              if: ${{ ! steps.download-tests.outputs.download-path }}
+              if: ${{ steps.download-tests.outputs.download-path }}
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
 
             - name: Upload Test Results if present
-              if: ${{ ! steps.download-tests.outputs.download-path }}
+              if: ${{ steps.download-tests.outputs.download-path }}
               uses: actions/upload-artifact@v3
               with:
                 name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
@@ -76,7 +75,6 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Updload jobs logs for Boxlang tests
-              if: ${{ ! steps.download-tests.outputs.download-path }}
               uses: actions/upload-artifact@v3
               with:
                 name: Job-logs-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
