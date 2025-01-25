@@ -60,14 +60,14 @@ jobs:
                 tree .
 
             - name: Publish Test Results if present
-              if: ${{ steps.download-tests.outputs.download-path }}
+              if: ${{ steps.download-tests.outputs.download-path != '' }}
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
 
             - name: Upload Test Results if present
-              if: ${{ steps.download-tests.outputs.download-path }}
+              if: ${{ steps.download-tests.outputs.download-path != '' }}
               uses: actions/upload-artifact@v3
               with:
                 name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
