@@ -9,6 +9,7 @@ permissions:
 
 env:
   GITHUB_ORGANIZATION: coldbox-modules
+  REGEX_BOXLANG: .*boxlang.*
 
 jobs:
     trigger:
@@ -37,12 +38,21 @@ jobs:
 
             - name: Download Tests
               uses: actions/download-artifact@v4
+              id: download-tests
+              continue-on-error: true
               with:
                 pattern: '*boxlang*'
                 path: ${{ matrix.repositories }}-tests
                 github-token: ${{ secrets.TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
+            
+            - name: Retrieve testbox logs if no tests artifacts are found
+              id: get-testbox-logs
+              run: |
+                job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))")' | jq -r '.id')
+                gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
+                
 
             - name: What is in download folder
               run: |
@@ -50,17 +60,24 @@ jobs:
                 ls -la
                 tree .
 
-            - name: Publish Test Results
+            - name: Publish Test Results if present
               uses: EnricoMi/publish-unit-test-result-action@v2
-              if: always()
+              if: steps.download-tests.outcome == 'success'
               with:
-                junit_files: ${{ matrix.repositories }}-tests/*.xml
+                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
 
-            - name: Upload Test Results to Artifacts
-              if: always()
+            - name: Upload Test Results if present
+              if: steps.download-tests.outcome == 'success'
               uses: actions/upload-artifact@v3
               with:
                 name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
                 path: |
-                  ${{ matrix.repositories }}-tests/*
+                  ${{ matrix.repositories }}-tests/**/*
+            
+            - name: Updload jobs logs for Boxlang tests
+              if: steps.download-tests.outcome == 'failure'
+              uses: actions/upload-artifact@v3
+              with:
+                name: Job-logs-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
+                path: "**/*.log"
