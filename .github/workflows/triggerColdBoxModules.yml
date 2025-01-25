@@ -63,8 +63,8 @@ jobs:
                 tree .
 
             - name: Publish Test Results if present
-              uses: EnricoMi/publish-unit-test-result-action@v2
               if: ${{ steps.download-tests.outputs.download-path }}
+              uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
