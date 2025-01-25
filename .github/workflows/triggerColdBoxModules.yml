@@ -50,6 +50,7 @@ jobs:
             - name: Retrieve testbox logs if no tests artifacts are found
               id: get-testbox-logs
               run: |
+                echo ${{ secrets.TOKEN }} | gh auth login --with-token
                 job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))")' | jq -r '.id')
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
