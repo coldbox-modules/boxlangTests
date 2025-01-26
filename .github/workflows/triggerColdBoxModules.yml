@@ -17,7 +17,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                repositories: ["cbSwagger", "cbdebugger"]
+                repositories: ["cbSwagger", "cbdebugger", "cbjavaloader"]
             fail-fast: false
         steps:
             - name: Checkout Repository
@@ -65,7 +65,9 @@ jobs:
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 #github_token: ${{ secrets.TOKEN }}
-                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
+                files: |
+                  ${{ matrix.repositories }}-tests/**/*.xml
+                  ${{ matrix.repositories }}-tests/**/*.json
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
 
             - name: Upload Test Results if present
@@ -76,15 +78,21 @@ jobs:
                 path: |
                   ${{ matrix.repositories }}-tests/**/*
 
-                  - name: Retrieve job logs
-                  id: get-testbox-logs
-                  run: |
-                    echo ${{ secrets.TOKEN }} | gh auth login --with-token
-                    job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.id')
-                    gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
+            - name: Retrieve job logs
+              id: get-testbox-logs
+              run: |
+                echo ${{ secrets.TOKEN }} | gh auth login --with-token
+                job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.id')
+                gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
               uses: actions/upload-artifact@v3
               with:
                 name: ${{ matrix.repositories }}-job-logs
                 path: "**/*.log"
+
+            - name: Get Boxlang tests job status
+              run: |
+                echo ${{ secrets.TOKEN }} | gh auth login --with-token
+                job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
+                echo "JOB_CONCLUSION=$job_conclusion" >> $GITHUB_ENV
