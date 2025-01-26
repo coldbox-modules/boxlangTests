@@ -19,6 +19,7 @@ jobs:
             matrix:
                 repositories: ["cbSwagger", "cbdebugger", "cbjavaloader"]
             fail-fast: false
+        continue-on-error: true
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
