@@ -6,6 +6,7 @@ on:
 permissions:
   actions: write
   contents: read
+  checks: write
 
 env:
   GITHUB_ORGANIZATION: coldbox-modules
@@ -71,18 +72,19 @@ jobs:
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
-                check_name: "${{ matrix.repositories }}-${{ matrix.cfengine }}-ColdBox_${{ matrix.coldboxVersion }}"
+                check_name: "${{ matrix.repositories }}-publishied-unit-tests"
+                
 
             - name: Upload Test Results if present
               if: ${{ steps.list-download-folder.outputs.total > 0 }}
               uses: actions/upload-artifact@v3
               with:
-                name: test-results-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
+                name: ${{ matrix.repositories }}-unit-tests
                 path: |
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Updload jobs logs for Boxlang tests
               uses: actions/upload-artifact@v3
               with:
-                name: Job-logs-${{ matrix.cfengine }}-${{ matrix.coldboxVersion }}
+                name: ${{ matrix.repositories }}-job-logs
                 path: "**/*.log"
