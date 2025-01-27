@@ -66,8 +66,7 @@ jobs:
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 #github_token: ${{ secrets.TOKEN }}
-                files: |
-                  ${{ matrix.repositories }}-tests/**/*.xml
+                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
                 compare_to_earlier_commit: false
 
