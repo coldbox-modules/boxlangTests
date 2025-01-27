@@ -67,6 +67,7 @@ jobs:
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
+                action_fail_on_inconclusive: true
                 #compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
@@ -78,7 +79,7 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Retrieve job logs
-              if: ${{ steps.publish-test-results.outcome == 'failure' }}
+              if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' }}
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
@@ -86,7 +87,7 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
-              if: ${{ steps.publish-test-results.outcome == 'failure' }}
+              if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' }}
               uses: actions/upload-artifact@v3
               with:
                 name: ${{ matrix.repositories }}-job-logs
