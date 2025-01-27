@@ -68,7 +68,7 @@ jobs:
                 #github_token: ${{ secrets.TOKEN }}
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
-                compare_to_earlier_commit: false
+                #compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
               if: ${{ steps.list-download-folder.outputs.total > 0 }}
