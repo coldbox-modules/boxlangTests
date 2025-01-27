@@ -68,9 +68,7 @@ jobs:
                 #github_token: ${{ secrets.TOKEN }}
                 files: |
                   ${{ matrix.repositories }}-tests/**/*.xml
-                  ${{ matrix.repositories }}-tests/**/*.json
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
-                check_run: false
                 compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
