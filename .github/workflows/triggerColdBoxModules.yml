@@ -19,7 +19,6 @@ jobs:
             matrix:
                 repositories: ["cbSwagger", "cbdebugger", "cbjavaloader"]
             fail-fast: false
-        continue-on-error: true
         steps:
             - name: Checkout Repository
               uses: actions/checkout@v4
@@ -63,6 +62,7 @@ jobs:
 
             - name: Publish Test Results if present
               if: ${{ steps.list-download-folder.outputs.total > 0 }}
+              id: publish-test-results
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
@@ -78,6 +78,7 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Retrieve job logs
+              if: ${{ steps.publish-test-results.outcome == 'failure' }}
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
@@ -85,6 +86,7 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
+              if: ${{ steps.publish-test-results.outcome == 'failure' }}
               uses: actions/upload-artifact@v3
               with:
                 name: ${{ matrix.repositories }}-job-logs
@@ -95,3 +97,4 @@ jobs:
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
                 job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
                 echo "JOB_CONCLUSION=$job_conclusion" >> $GITHUB_ENV
+                echo "Conclusion for Boxlang tests in repository ${{ matrix.repositories }} is $job_conclusion"
