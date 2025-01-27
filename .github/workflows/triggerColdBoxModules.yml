@@ -29,7 +29,7 @@ jobs:
               with:
                 owner: ${{ env.GITHUB_ORGANIZATION }}
                 repo: ${{ matrix.repositories }}
-                github_token: ${{ secrets.TOKEN }}
+                github_token: ${{ secrets.GITHUB_TOKEN }}
                 workflow_file_name: snapshot.yml
                 ref: development
                 wait_interval: 120
@@ -44,7 +44,7 @@ jobs:
               with:
                 pattern: '*boxlang*'
                 path: ${{ matrix.repositories }}-tests
-                github-token: ${{ secrets.TOKEN }}
+                github-token: ${{ secrets.GITHUB_TOKEN }}
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
 
@@ -65,7 +65,7 @@ jobs:
               if: ${{ steps.list-download-folder.outputs.total > 0 }}
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
-                #github_token: ${{ secrets.TOKEN }}
+                #github_token: ${{ secrets.GITHUB_TOKEN }}
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
                 #compare_to_earlier_commit: false
@@ -81,7 +81,7 @@ jobs:
             - name: Retrieve job logs
               id: get-testbox-logs
               run: |
-                echo ${{ secrets.TOKEN }} | gh auth login --with-token
+                echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
                 job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.id')
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
@@ -93,6 +93,6 @@ jobs:
 
             - name: Get Boxlang tests job status
               run: |
-                echo ${{ secrets.TOKEN }} | gh auth login --with-token
+                echo ${{ secrets.GITHUB_TOKEN }} | gh auth login --with-token
                 job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
                 echo "JOB_CONCLUSION=$job_conclusion" >> $GITHUB_ENV
