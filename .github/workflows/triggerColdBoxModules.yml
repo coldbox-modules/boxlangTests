@@ -72,7 +72,7 @@ jobs:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
                 action_fail_on_inconclusive: true
-                commit: ${{ inputs.boxlang_commit }}
+                #commit: ${{ inputs.boxlang_commit }}
                 #compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
