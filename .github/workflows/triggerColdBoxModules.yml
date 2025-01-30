@@ -77,7 +77,7 @@ jobs:
 
             - name: Upload Test Results if present
               if: ${{ steps.list-download-folder.outputs.total > 0 }}
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-unit-tests
                 path: |
@@ -93,7 +93,7 @@ jobs:
                 
             - name: Updload jobs logs for Boxlang tests
               if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' }}
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-job-logs
                 path: "**/*.log"
