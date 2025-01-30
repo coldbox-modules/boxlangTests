@@ -82,6 +82,9 @@ jobs:
                 name: ${{ matrix.repositories }}-unit-tests
                 path: |
                   ${{ matrix.repositories }}-tests/**/*
+            
+            - name: Whats inside publish tests output
+              run: echo "${{ steps.publish-test-results.outputs.json }}"
 
             - name: Retrieve job logs
               if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' }}
