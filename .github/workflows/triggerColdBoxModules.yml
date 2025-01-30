@@ -1,6 +1,11 @@
 name: Trigger ColdBox Modules Tests
 on:
     workflow_dispatch:
+      inputs:
+        boxlang_commit:
+          type: string
+          required: true
+          description: Last commit in Boxlang's GitHub repository that triggered this workflow
 
 permissions:
   actions: write
@@ -67,6 +72,7 @@ jobs:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-publishied-unit-tests"
                 action_fail_on_inconclusive: true
+                commit: ${{ inputs.boxlang_commit }}
                 #compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
@@ -97,4 +103,5 @@ jobs:
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
                 job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
                 echo "JOB_CONCLUSION=$job_conclusion" >> $GITHUB_ENV
-                echo "Conclusion for Boxlang tests in repository ${{ matrix.repositories }} is $job_conclusion"
+                echo "Conclusion for Boxlang tests in repository ${{ matrix.repositories }} is $job_conclusion triggered by:" 
+                echo "https://github.com/ortus-boxlang/BoxLang/commit/${{ inputs.boxlang_commit }}"
