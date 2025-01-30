@@ -84,7 +84,7 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Retrieve job logs
-              if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' || steps.publish-test-results.outcome != 'skipped' }}
+              if: ${{ steps.publish-test-results.outcome == 'skipped' }}
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
@@ -92,7 +92,7 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
-              if: ${{ fromJson( steps.publish-test-results.outputs.json ).conclusion == 'failure' }}
+              if: ${{ steps.publish-test-results.outcome == 'skipped' }}
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-job-logs
