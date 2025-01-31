@@ -40,6 +40,7 @@ jobs:
                 trigger_workflow: true
                 wait_workflow: true
               id: trigger
+              timeout-minutes: 10
 
             - name: Download Tests
               uses: actions/download-artifact@v4
