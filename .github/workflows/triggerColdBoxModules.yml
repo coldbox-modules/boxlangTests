@@ -24,9 +24,6 @@ jobs:
                 repositories: ["cbSwagger", "cbdebugger", "cbjavaloader"]
             fail-fast: false
         steps:
-            - name: Checkout Repository
-              uses: actions/checkout@v4
-
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
               with:
@@ -51,13 +48,6 @@ jobs:
                 repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
                 run-id: ${{ steps.trigger.outputs.workflow_id }}
 
-            - name: Check if there is downloads
-              id: list-download-folder
-              uses: Drafteame/list-folders-action@main
-              with:
-                paths: |
-                    ${{ steps.download-tests.outputs.download-path }}
-
             - name: What is in download folder
               run: |
                 pwd
@@ -65,18 +55,14 @@ jobs:
                 tree .
 
             - name: Publish Test Results if present
-              if: ${{ steps.list-download-folder.outputs.total > 0 }}
               id: publish-test-results
               uses: EnricoMi/publish-unit-test-result-action@v2
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
-                check_name: "${{ matrix.repositories }}-publishied-unit-tests"
+                check_name: "${{ matrix.repositories }}-published-unit-tests"
                 action_fail_on_inconclusive: true
-                #commit: ${{ inputs.boxlang_commit }}
-                #compare_to_earlier_commit: false
 
             - name: Upload Test Results if present
-              if: ${{ steps.list-download-folder.outputs.total > 0 }}
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-unit-tests
@@ -84,7 +70,7 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Retrieve job logs
-              if: ${{ steps.publish-test-results.outcome == 'skipped' }}
+              if: ${{ always() }}
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
@@ -92,7 +78,6 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
-              if: ${{ steps.publish-test-results.outcome == 'skipped' }}
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-job-logs
