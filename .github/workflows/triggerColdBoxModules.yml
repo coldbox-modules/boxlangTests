@@ -24,6 +24,9 @@ jobs:
                 repositories: ["cbSwagger", "cbdebugger", "cbjavaloader"]
             fail-fast: false
         steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
             - name: Trigger ColdBox Module
               uses: convictional/trigger-workflow-and-wait@v1.6.5
               with:
@@ -78,12 +81,14 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
+              if: ${{ always() }}
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-job-logs
                 path: "**/*.log"
 
             - name: Get Boxlang tests job status
+              if: ${{ always() }}
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
                 job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
