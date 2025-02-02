@@ -61,12 +61,13 @@ jobs:
             - name: Publish Test Results if present
               id: publish-test-results
               uses: EnricoMi/publish-unit-test-result-action@v2
+              if: always()
               with:
                 junit_files: ${{ matrix.repositories }}-tests/**/*.xml
                 check_name: "${{ matrix.repositories }}-published-unit-tests"
-                action_fail_on_inconclusive: true
 
             - name: Upload Test Results if present
+              if: always()
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-unit-tests
@@ -74,7 +75,7 @@ jobs:
                   ${{ matrix.repositories }}-tests/**/*
 
             - name: Retrieve job logs
-              if: ${{ always() }}
+              if: ${{ failure() }}
               id: get-testbox-logs
               run: |
                 echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
@@ -82,7 +83,7 @@ jobs:
                 gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
                 
             - name: Updload jobs logs for Boxlang tests
-              if: ${{ always() }}
+              if: ${{ failure() }}
               uses: actions/upload-artifact@v4
               with:
                 name: ${{ matrix.repositories }}-job-logs
