@@ -1,0 +1,20 @@
+name: Execute tests on coldbox modules
+on:
+    workflow_dispatch:
+      inputs:
+        boxlang_commit:
+          type: string
+          required: true
+          description: Last commit in Boxlang's GitHub repository that triggered this workflow
+
+permissions:
+  actions: write
+  contents: read
+  checks: write
+
+jobs:
+    trigger:
+        secrets: inherit
+        uses: ./.github/workflows/triggerColdBoxModules.yml
+        with:
+            boxlang_commit: ${{ github.event.inputs.boxlang_commit }}
