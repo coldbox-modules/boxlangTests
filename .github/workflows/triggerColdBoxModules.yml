@@ -21,7 +21,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                repositories: ["cbSwagger", "cbdebugger", "cbjavaloader", "cbantisamy"]
+                repositories: ["cbSwagger", "cbdebugger", "cbjavaloader", "cbantisamy", "cbfeeds", "cbmessagebox"]
             fail-fast: false
         steps:
             - name: Checkout Repository
