@@ -68,13 +68,19 @@ jobs:
                 tree .
 
             - name: Publish Test Results if present
-              id: publish-test-results
-              uses: EnricoMi/publish-unit-test-result-action@v2
-              if: always()
+              uses: mikepenz/action-junit-report@v5
+              if: success() || failure() # always run even if the previous step fails
               with:
-                junit_files: ${{ matrix.repositories }}-tests/**/*.xml
-                check_name: "${{ matrix.repositories }}-published-unit-tests"
-                fail_on: "errors"
+                report_paths: '${{ matrix.repositories }}-tests/**/*.xml'
+                detailed_summary: true
+
+            # - name: Publish Test Results if present
+            #   id: publish-test-results
+            #   uses: EnricoMi/publish-unit-test-result-action@v2
+            #   if: always()
+            #   with:
+            #     junit_files: ${{ matrix.repositories }}-tests/**/*.xml
+            #     check_name: "${{ matrix.repositories }}-published-unit-tests"
 
             - name: Upload Test Results if present
               if: always()
