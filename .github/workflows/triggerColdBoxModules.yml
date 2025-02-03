@@ -74,7 +74,7 @@ jobs:
                 name: ${{ matrix.repositories }}-published-unit-tests
                 path: ${{ matrix.repositories }}-tests/**/*.xml
                 reporter: java-junit
-                output-to: 'step-summary'
+                output-to: 'checks'
 
             # - name: Publish Test Results if present
             #   uses: mikepenz/action-junit-report@v5
