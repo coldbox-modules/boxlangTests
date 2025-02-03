@@ -67,15 +67,24 @@ jobs:
                 ls -la
                 tree .
 
-            - name: Publish Test Results if present
-              uses: mikepenz/action-junit-report@v5
-              if: success() || failure() # always run even if the previous step fails
+            - name: Test Report
+              uses: phoenix-actions/test-reporting@v15
+              if: success() || failure()    
               with:
-                report_paths: '${{ matrix.repositories }}-tests/**/*.xml'
-                job_name: '${{ matrix.repositories }}-published-unit-tests'
-                job_summary: true
-                detailed_summary: true
-                summary: This Boxlang [commit](https://github.com/ortus-boxlang/BoxLang/commit/${{ inputs.boxlang_commit }}) triggered me.
+                name: ${{ matrix.repositories }}-published-unit-tests
+                path: ${{ matrix.repositories }}-tests/**/*.xml
+                reporter: java-junit
+                output-to: 'step-summary'
+
+            # - name: Publish Test Results if present
+            #   uses: mikepenz/action-junit-report@v5
+            #   if: success() || failure() # always run even if the previous step fails
+            #   with:
+            #     report_paths: '${{ matrix.repositories }}-tests/**/*.xml'
+            #     job_name: '${{ matrix.repositories }}-published-unit-tests'
+            #     job_summary: true
+            #     detailed_summary: true
+            #     summary: This Boxlang [commit](https://github.com/ortus-boxlang/BoxLang/commit/${{ inputs.boxlang_commit }}) triggered me.
 
             # - name: Publish Test Results if present
             #   id: publish-test-results
