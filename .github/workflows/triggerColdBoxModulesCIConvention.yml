@@ -33,7 +33,7 @@ jobs:
                 owner: ${{ env.GITHUB_ORGANIZATION }}
                 repo: ${{ matrix.repositories }}
                 github_token: ${{ secrets.PAT_GITHUB }}
-                workflow_file_name: snapshot.yml
+                workflow_file_name: ci.yml
                 ref: development
                 wait_interval: 30
                 propagate_failure: false
