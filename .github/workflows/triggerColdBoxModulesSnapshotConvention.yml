@@ -21,7 +21,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                repositories: ["cbSwagger", "cbdebugger", "cbjavaloader", "cbantisamy", "cbfeeds", "cbmessagebox", "cbstorages", "cbmailservices", "cbsecurity", "cbvalidation", "cborm", "cbi18n", "cbcsrf", "bcrypt", "cbmarkdown", "MockDataCFC", "route-visualizer", "cbstreams", "cbfs", "mementifier"]
+                repositories: ["cbSwagger", "cbdebugger", "cbjavaloader", "cbantisamy", "cbfeeds", "cbmessagebox", "cbstorages", "cbmailservices", "cbsecurity", "cbvalidation", "cborm", "cbi18n", "cbcsrf", "bcrypt", "cbmarkdown", "MockDataCFC", "route-visualizer", "cbstreams", "cbfs", "mementifier", "sentry"]
             fail-fast: false
         steps:
             - name: Checkout Repository
