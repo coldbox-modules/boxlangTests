@@ -1,0 +1,119 @@
+name: Trigger ColdBox Modules Tests with CI workflow file
+on:
+    workflow_call:
+      inputs:
+        boxlang_commit:
+          type: string
+          required: true
+          description: Last commit in Boxlang's GitHub repository that triggered this workflow
+
+permissions:
+  actions: write
+  contents: read
+  checks: write
+
+env:
+  GITHUB_ORGANIZATION: coldbox-modules
+  REGEX_BOXLANG: .*boxlang.*
+
+jobs:
+    trigger:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                repositories: [ "cbelasticsearch" ]
+            fail-fast: false
+        steps:
+            - name: Checkout Repository
+              uses: actions/checkout@v4
+
+            - name: Trigger ColdBox Module
+              uses: convictional/trigger-workflow-and-wait@v1.6.5
+              with:
+                owner: ${{ env.GITHUB_ORGANIZATION }}
+                repo: ${{ matrix.repositories }}
+                github_token: ${{ secrets.PAT_GITHUB }}
+                workflow_file_name: snapshot.yml
+                ref: development
+                wait_interval: 30
+                propagate_failure: false
+                trigger_workflow: true
+                wait_workflow: true
+              id: trigger
+              #timeout-minutes: 10
+
+            - name: Get Boxlang tests job status
+              if: ${{ always() }}
+              run: |
+                echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
+                job_conclusion=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.conclusion')
+                echo "JOB_CONCLUSION=$job_conclusion" >> $GITHUB_ENV
+                echo "Conclusion for Boxlang tests in repository ${{ matrix.repositories }} is $job_conclusion triggered by:" 
+                echo "https://github.com/ortus-boxlang/BoxLang/commit/${{ inputs.boxlang_commit }}"
+
+            - name: Download Tests
+              uses: actions/download-artifact@v4
+              id: download-tests
+              with:
+                pattern: '*boxlang*'
+                path: ${{ matrix.repositories }}-tests
+                github-token: ${{ secrets.PAT_GITHUB }}
+                repository: ${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}
+                run-id: ${{ steps.trigger.outputs.workflow_id }}
+
+            - name: What is in download folder
+              run: |
+                pwd
+                ls -la
+                tree .
+
+            - name: Test Report
+              uses: phoenix-actions/test-reporting@v15
+              if: success() || failure()    
+              with:
+                name: ${{ matrix.repositories }}-published-unit-tests
+                path: ${{ matrix.repositories }}-tests/**/*.xml
+                reporter: java-junit
+                output-to: 'checks'
+
+            # - name: Publish Test Results if present
+            #   uses: mikepenz/action-junit-report@v5
+            #   if: success() || failure() # always run even if the previous step fails
+            #   with:
+            #     report_paths: '${{ matrix.repositories }}-tests/**/*.xml'
+            #     job_name: '${{ matrix.repositories }}-published-unit-tests'
+            #     job_summary: true
+            #     detailed_summary: true
+            #     summary: This Boxlang [commit](https://github.com/ortus-boxlang/BoxLang/commit/${{ inputs.boxlang_commit }}) triggered me.
+
+            # - name: Publish Test Results if present
+            #   id: publish-test-results
+            #   uses: EnricoMi/publish-unit-test-result-action@v2
+            #   if: always()
+            #   with:
+            #     junit_files: ${{ matrix.repositories }}-tests/**/*.xml
+            #     check_name: "${{ matrix.repositories }}-published-unit-tests"
+
+            - name: Upload Test Results if present
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ matrix.repositories }}-unit-tests
+                path: |
+                  ${{ matrix.repositories }}-tests/**/*
+
+            - name: Retrieve job logs
+              if: ${{ failure() }}
+              id: get-testbox-logs
+              run: |
+                echo ${{ secrets.PAT_GITHUB }} | gh auth login --with-token
+                job_id=$(gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/runs/${{ steps.trigger.outputs.workflow_id }}/jobs" | jq '.jobs[] | select(.name | test("${{ env.REGEX_BOXLANG }}"))' | jq -r '.id')
+                gh api "/repos/${{ env.GITHUB_ORGANIZATION }}/${{ matrix.repositories }}/actions/jobs/$job_id/logs" > "${{ steps.trigger.outputs.workflow_id }}-$job_id.log"
+
+            - name: Updload jobs logs for Boxlang tests
+              if: ${{ failure() }}
+              uses: actions/upload-artifact@v4
+              with:
+                name: ${{ matrix.repositories }}-job-logs
+                path: "**/*.log"
+

@@ -13,8 +13,14 @@ permissions:
   checks: write
 
 jobs:
-    trigger:
+    snapshot-convention:
         secrets: inherit
-        uses: ./.github/workflows/triggerColdBoxModules.yml
+        uses: ./.github/workflows/triggerColdBoxModulesSnapshotConvention.yml
+        with:
+            boxlang_commit: ${{ github.event.inputs.boxlang_commit }}
+
+    ci-convention:
+        secrets: inherit
+        uses: ./.github/workflows/triggerColdBoxModulesCIConvention.yml
         with:
             boxlang_commit: ${{ github.event.inputs.boxlang_commit }}
