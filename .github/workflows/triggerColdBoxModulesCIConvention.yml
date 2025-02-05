@@ -21,7 +21,7 @@ jobs:
         runs-on: ubuntu-latest
         strategy:
             matrix:
-                repositories: [ "cbelasticsearch" ]
+                repositories: [ "cbelasticsearch", "s3sdk" ]
             fail-fast: false
         steps:
             - name: Checkout Repository
