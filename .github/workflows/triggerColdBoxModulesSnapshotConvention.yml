@@ -35,7 +35,7 @@ jobs:
                 github_token: ${{ secrets.PAT_GITHUB }}
                 workflow_file_name: snapshot.yml
                 ref: development
-                wait_interval: 30
+                wait_interval: 61
                 propagate_failure: false
                 trigger_workflow: true
                 wait_workflow: true
